@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 
 	"task_scheduler/internal/db"
 	help "task_scheduler/internal/helpers"
@@ -12,15 +13,10 @@ type TasksResp struct {
 }
 
 func TasksHandler(w http.ResponseWriter, req *http.Request){
-	/*
-	метод возможно так проверть
-	if req.Method != http.MethodGet {
-		help.WriteJSON(w, http.StatusMethodNotAllowed, "Method not allowed") 
-		return
-	}
-	*/
 	defaultLimit := 50
-	tasks, err := db.Tasks(defaultLimit)
+	search := strings.TrimSpace(req.URL.Query().Get("search"))
+
+	tasks, err := db.Tasks(search, defaultLimit)
     if err != nil {
        	help.WriteJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
         return

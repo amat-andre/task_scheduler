@@ -3,12 +3,22 @@ package api
 import (
 	"net/http"
 
-hdl "task_scheduler/internal/handlers"
+	"task_scheduler/internal/auth"
+	hdl "task_scheduler/internal/handlers"
+	mdw "task_scheduler/internal/middleware"
 )
 
 func Init(mux *http.ServeMux) {
-    mux.HandleFunc("GET /api/nextdate", hdl.NextHandler) // cделать только Get обработчиком
-	mux.HandleFunc("/api/task", hdl.TaskHandler) // cделать только Post обработчиком ** уже не надо, там свитч на выбор метода внутри
-	mux.HandleFunc("POST /api/task/done", hdl.TaskDoneHandler) // post
-	mux.HandleFunc("GET /api/tasks", hdl.TasksHandler) // обработчик для get запроса
+	servPass := auth.GetServPass()
+
+	mux.HandleFunc("POST /api/signin", hdl.AuthHandler)
+	mux.HandleFunc("GET /api/nextdate", hdl.NextHandler)
+
+	mux.HandleFunc("GET /api/task", mdw.Middleware(servPass, hdl.GetTaskHandler))
+	mux.HandleFunc("POST /api/task", mdw.Middleware(servPass, hdl.AddTaskHandler))
+	mux.HandleFunc("PUT /api/task", mdw.Middleware(servPass, hdl.UpdateTaskHandler))
+	mux.HandleFunc("DELETE /api/task", mdw.Middleware(servPass, hdl.DeleteTaskHandler))
+ 
+	mux.HandleFunc("POST /api/task/done", mdw.Middleware(servPass, hdl.TaskDoneHandler))
+	mux.HandleFunc("GET /api/tasks", mdw.Middleware(servPass, hdl.TasksHandler))
 } 

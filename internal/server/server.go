@@ -1,19 +1,18 @@
 package server
 
 import (
+	"os"
 	"log"
 	"net/http"
 	"time"
 
 	"task_scheduler/internal/api"
-	help "task_scheduler/internal/helpers"
 )
 
 const(
 	defPort = "7540"
 	webDir = "./web"
 )
-
 
 type Server struct {
 	Log *log.Logger
@@ -23,14 +22,13 @@ type Server struct {
 func NewRout(logger *log.Logger) *Server {
 	mux := http.NewServeMux()
 
-	mux.Handle("/", http.FileServer(http.Dir(webDir)))
+	mux.Handle("GET /", http.FileServer(http.Dir(webDir)))
 	api.Init(mux)
-
 
 	server := Server{
 		Log: logger,
 		Serv: http.Server{
-			Addr: ":" + help.GetPort(defPort),
+			Addr: ":" + getPort(),
 			Handler: mux,
 			ErrorLog: logger,
 			ReadTimeout:  5 * time.Second,
@@ -38,4 +36,11 @@ func NewRout(logger *log.Logger) *Server {
 	}
 
 	return &server
+}
+
+func getPort() string {
+	if port := os.Getenv("TODO_PORT"); len(port) > 0 {
+		return port
+	}
+	return defPort
 }

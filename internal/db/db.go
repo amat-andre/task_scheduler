@@ -6,8 +6,6 @@ import(
 
 	"database/sql"
 	_ "modernc.org/sqlite"
-
-	help "task_scheduler/internal/helpers"
 )
 
 const (
@@ -28,7 +26,7 @@ defFileDB = "scheduler.db"
 var db *sql.DB
 
 func Init() error {	
-	dbFile := help.GetFileDB(defFileDB)
+	dbFile := getFileDB()
 	var install bool
 	_, err := os.Stat(dbFile)
 	install = os.IsNotExist(err)
@@ -60,4 +58,11 @@ func Close(){
 	if db != nil {
 		_ = db.Close()
 	}
+}
+
+func getFileDB() string {
+	if dbFile := os.Getenv("TODO_DBFILE"); len(dbFile) > 0 {
+		return dbFile
+	}
+	return defFileDB
 }

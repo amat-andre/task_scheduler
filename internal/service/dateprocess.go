@@ -13,13 +13,14 @@ var(
 	ErrorEmptyRepeat = errors.New("repeat is empty")
 	ErrorIncorrectRepeat = errors.New("incorrect repeat format")
 	ErrorUnsupportRepeat = errors.New("unsupported repeat format")
-	ErrorIncorrectDate = errors.New("incorrect dstart format")
+	ErrorIncorrectStart = errors.New("incorrect dstart format")
+	ErrorIncorrectDate = errors.New("incorrect date format")
 )
 
 const DateFormat = "20060102"
 
 func AfterNow(date, now time.Time) bool {
-	return onlyDate(date).After(onlyDate(now)) // true если вызывающий после передаваемого в аргументе (если Data позже)
+	return onlyDate(date).After(onlyDate(now))
 }
 
 func onlyDate(t time.Time) time.Time {
@@ -33,7 +34,7 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 
 	date, err := time.Parse(DateFormat, dstart)
 	if err != nil {
-		return "", fmt.Errorf("%w: %w", ErrorIncorrectDate, err)
+		return "", fmt.Errorf("%w: %w", ErrorIncorrectStart, err)
 	}
 
 	repeatData := strings.Fields(repeat)
@@ -91,11 +92,10 @@ func CheckDate(task *db.Task) error {
 	if strings.TrimSpace(task.Repeat) != "" {
 		nextDate, err = NextDate(now, task.Date, task.Repeat)
 		if err != nil {
-			return err
+			return fmt.Errorf("check date failed: %w", err)
 		}
 	}
 
-	// если сегодня (now) больше task.Date (t)
 	if AfterNow(now, t) {
         if len(task.Repeat) == 0 {
 			// если правила повторения нет, то берём сегодняшнее число

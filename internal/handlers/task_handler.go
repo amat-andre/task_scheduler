@@ -11,26 +11,7 @@ import (
 	"task_scheduler/internal/service"
 )
 
-// роутинг обработчиков
-func TaskHandler(w http.ResponseWriter, req *http.Request){
-	switch req.Method {
-    // обработка других методов будет добавлена на следующих шагах
-    case http.MethodPost:
-        addTaskHandler(w, req)
-	case http.MethodGet:
-        getTaskHandler(w, req)
-	case http.MethodPut:
-        updateTaskHandler(w, req)
-	case http.MethodDelete:
-        deleteTaskHandler(w, req)
-	default:
-		http.Error(w, fmt.Sprintf("%s method is not supported", req.Method), http.StatusMethodNotAllowed) // через json переделатть
-    }
-	
-}
-
-
-func addTaskHandler(w http.ResponseWriter, req *http.Request){
+func AddTaskHandler(w http.ResponseWriter, req *http.Request){
 	var task db.Task
 	decoder := json.NewDecoder(req.Body)
 
@@ -60,7 +41,7 @@ func addTaskHandler(w http.ResponseWriter, req *http.Request){
 	help.WriteJSON(w, http.StatusCreated, map[string]string{"id": fmt.Sprint(id)})	
 }
 
-func getTaskHandler(w http.ResponseWriter, req *http.Request){
+func GetTaskHandler(w http.ResponseWriter, req *http.Request){
 	id := strings.TrimSpace(req.URL.Query().Get("id"))
 	if id == "" {
 		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "id is empty"})
@@ -76,7 +57,7 @@ func getTaskHandler(w http.ResponseWriter, req *http.Request){
 	help.WriteJSON(w, http.StatusOK, task)
 }
 
-func updateTaskHandler(w http.ResponseWriter, req *http.Request){
+func UpdateTaskHandler(w http.ResponseWriter, req *http.Request){
 	var task db.Task
 	decoder := json.NewDecoder(req.Body)
 
@@ -110,7 +91,7 @@ func updateTaskHandler(w http.ResponseWriter, req *http.Request){
 	help.WriteJSON(w, http.StatusOK, map[string]string{})
 }
 
-func deleteTaskHandler(w http.ResponseWriter, req *http.Request){
+func DeleteTaskHandler(w http.ResponseWriter, req *http.Request){
 	id := strings.TrimSpace(req.URL.Query().Get("id"))
 	if id == "" {
 		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "id is empty"})

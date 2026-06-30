@@ -1,41 +1,43 @@
 package handlers
 
-import(
+import (
 	"net/http"
-	"time"
 	"strings"
+	"time"
 
+	help "task_scheduler/internal/helpers"
 	"task_scheduler/internal/service"
 )
-// можно переделать ошибки в объявляемые через var, как в nextdate.go и проверить в остальных пакетах
+
 func NextHandler(w http.ResponseWriter, req *http.Request){
 	now := time.Now()
-	currentDate:= req.URL.Query().Get("now")
-	if !(strings.TrimSpace(currentDate) == ""){
+	currentDate:= strings.TrimSpace(req.URL.Query().Get("now"))
+	if !(currentDate == ""){
 		nowParse, err := time.Parse(service.DateFormat, currentDate)
 		if err != nil {
-			http.Error(w, "incorrect now format", http.StatusBadRequest)
+			help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "incorrect now format"})
 			return
 		}
 		now = nowParse
 	}
 
-	startDate := req.URL.Query().Get("date")
-	if strings.TrimSpace(startDate) == ""{
-		http.Error(w, "incorrect date format", http.StatusBadRequest)
-		return
+	startDate := strings.TrimSpace(req.URL.Query().Get("date"))
+	if startDate == ""{
+		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "incorrect date format"})
+			return
 	}
 	
-	repeat := req.URL.Query().Get("repeat")
-	if strings.TrimSpace(repeat) == ""{
-		http.Error(w, "incorrect repeat format", http.StatusBadRequest)
+	repeat := strings.TrimSpace(req.URL.Query().Get("repeat"))
+	if repeat == ""{
+		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "incorrect repeat format"})
 		return
 	}
 
 	nextDate, err := service.NextDate(now, startDate, repeat)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 		return
 	}
-	w.Write([]byte(nextDate)) // здесь подумать, возможно стоит сразу заголовок записать тут же
+
+	w.Write([]byte(nextDate))
 }
