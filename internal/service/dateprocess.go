@@ -9,15 +9,13 @@ import (
 	"time"
 )
 
-var(
-	ErrorEmptyRepeat = errors.New("repeat is empty")
+var (
+	ErrorEmptyRepeat     = errors.New("repeat is empty")
 	ErrorIncorrectRepeat = errors.New("incorrect repeat format")
 	ErrorUnsupportRepeat = errors.New("unsupported repeat format")
-	ErrorIncorrectStart = errors.New("incorrect dstart format")
-	ErrorIncorrectDate = errors.New("incorrect date format")
+	ErrorIncorrectStart  = errors.New("incorrect dstart format")
+	ErrorIncorrectDate   = errors.New("incorrect date format")
 )
-
-const DateFormat = "20060102"
 
 func AfterNow(date, now time.Time) bool {
 	return onlyDate(date).After(onlyDate(now))
@@ -32,14 +30,14 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		return "", fmt.Errorf("%w: %w", ErrorIncorrectRepeat, ErrorEmptyRepeat)
 	}
 
-	date, err := time.Parse(DateFormat, dstart)
+	date, err := time.Parse(db.DateFormat, dstart)
 	if err != nil {
 		return "", fmt.Errorf("%w: %w", ErrorIncorrectStart, err)
 	}
 
 	repeatData := strings.Fields(repeat)
-	
-	switch repeatData[0]{
+
+	switch repeatData[0] {
 	case "d":
 		if len(repeatData) != 2 {
 			return "", fmt.Errorf("%w: invalid days value", ErrorIncorrectRepeat)
@@ -51,25 +49,25 @@ func NextDate(now time.Time, dstart string, repeat string) (string, error) {
 		}
 
 		for {
-    		date = date.AddDate(0, 0, days)
-   			if AfterNow(date, now) {
-        		break
-    		}
-		} 
-		return date.Format(DateFormat), nil
+			date = date.AddDate(0, 0, days)
+			if AfterNow(date, now) {
+				break
+			}
+		}
+		return date.Format(db.DateFormat), nil
 
 	case "y":
 		if len(repeatData) != 1 {
 			return "", fmt.Errorf("%w: invalid year value", ErrorIncorrectRepeat)
 		}
-		
+
 		for {
-    		date = date.AddDate(1, 0, 0)
-   			if AfterNow(date, now) {
-        		break
-    		}
-		} 
-		return date.Format(DateFormat), nil
+			date = date.AddDate(1, 0, 0)
+			if AfterNow(date, now) {
+				break
+			}
+		}
+		return date.Format(db.DateFormat), nil
 
 	default:
 		return "", ErrorUnsupportRepeat
@@ -80,10 +78,10 @@ func CheckDate(task *db.Task) error {
 	now := time.Now()
 
 	if strings.TrimSpace(task.Date) == "" {
-		task.Date = now.Format(DateFormat)
-	} 
+		task.Date = now.Format(db.DateFormat)
+	}
 
-	t, err := time.Parse(DateFormat, task.Date)
+	t, err := time.Parse(db.DateFormat, task.Date)
 	if err != nil {
 		return ErrorIncorrectDate
 	}
@@ -97,13 +95,13 @@ func CheckDate(task *db.Task) error {
 	}
 
 	if AfterNow(now, t) {
-        if len(task.Repeat) == 0 {
+		if len(task.Repeat) == 0 {
 			// если правила повторения нет, то берём сегодняшнее число
-            task.Date = now.Format(DateFormat)
-        } else {
-            // в противном случае, берём вычисленную ранее следующую дату
-            task.Date = nextDate
-        }
-    } 
+			task.Date = now.Format(db.DateFormat)
+		} else {
+			// в противном случае, берём вычисленную ранее следующую дату
+			task.Date = nextDate
+		}
+	}
 	return nil
 }

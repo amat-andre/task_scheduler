@@ -11,7 +11,7 @@ import (
 	"task_scheduler/internal/service"
 )
 
-func AddTaskHandler(w http.ResponseWriter, req *http.Request){
+func AddTaskHandler(w http.ResponseWriter, req *http.Request) {
 	var task db.Task
 	decoder := json.NewDecoder(req.Body)
 
@@ -38,10 +38,10 @@ func AddTaskHandler(w http.ResponseWriter, req *http.Request){
 		return
 	}
 
-	help.WriteJSON(w, http.StatusCreated, map[string]string{"id": fmt.Sprint(id)})	
+	help.WriteJSON(w, http.StatusCreated, map[string]string{"id": fmt.Sprint(id)})
 }
 
-func GetTaskHandler(w http.ResponseWriter, req *http.Request){
+func GetTaskHandler(w http.ResponseWriter, req *http.Request) {
 	id := strings.TrimSpace(req.URL.Query().Get("id"))
 	if id == "" {
 		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "id is empty"})
@@ -57,7 +57,7 @@ func GetTaskHandler(w http.ResponseWriter, req *http.Request){
 	help.WriteJSON(w, http.StatusOK, task)
 }
 
-func UpdateTaskHandler(w http.ResponseWriter, req *http.Request){
+func UpdateTaskHandler(w http.ResponseWriter, req *http.Request) {
 	var task db.Task
 	decoder := json.NewDecoder(req.Body)
 
@@ -91,7 +91,7 @@ func UpdateTaskHandler(w http.ResponseWriter, req *http.Request){
 	help.WriteJSON(w, http.StatusOK, map[string]string{})
 }
 
-func DeleteTaskHandler(w http.ResponseWriter, req *http.Request){
+func DeleteTaskHandler(w http.ResponseWriter, req *http.Request) {
 	id := strings.TrimSpace(req.URL.Query().Get("id"))
 	if id == "" {
 		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "id is empty"})

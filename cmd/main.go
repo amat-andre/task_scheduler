@@ -8,17 +8,18 @@ import (
 )
 
 func main() {
-    logger := log.New(log.Writer(), "", log.LstdFlags|log.Lshortfile)
+	logger := log.New(log.Writer(), "", log.LstdFlags|log.Lshortfile)
 	server := srv.NewRout(logger)
 
-    err := db.Init()
-    if err != nil {
-		logger.Fatal(err)
+	err := db.Init()
+	if err != nil {
+		logger.Println(err)
+		return
 	}
-    defer db.Close()
-    
+	defer db.Close()
+
 	err = server.Serv.ListenAndServe()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Println(err)
 	}
 }

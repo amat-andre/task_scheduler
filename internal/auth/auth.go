@@ -4,14 +4,12 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"os"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
 var ErrTokenSignin = errors.New("token signing error")
-
 
 type Claims struct {
 	PasswordHash string `json:"password_hash"`
@@ -50,11 +48,4 @@ func ValidateToken(tokenString, servPass string) bool {
 func hashPassword(pass string) string {
 	sum := sha256.Sum256([]byte(pass))
 	return hex.EncodeToString(sum[:])
-}
-
-func GetServPass() string {
-	if servPass := os.Getenv("TODO_PASSWORD"); len(servPass) > 0 {
-		return servPass
-	}
-	return ""
 }

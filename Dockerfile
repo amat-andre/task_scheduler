@@ -9,11 +9,7 @@ FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /scheduler /app/scheduler
 COPY web /app/web
-
-EXPOSE 7540
-
 ENV TODO_PORT=7540
 ENV TODO_DBFILE=scheduler.db
 ENV TODO_PASSWORD=
-
 CMD ["/app/scheduler"]

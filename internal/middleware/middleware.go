@@ -9,7 +9,7 @@ import (
 
 func Middleware(servPass string, next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		if servPass != "" {	
+		if servPass != "" {
 			cookie, err := req.Cookie("token")
 			if err != nil || cookie.Value == "" {
 				help.WriteJSON(w, http.StatusUnauthorized, map[string]string{"error": "Authentication required"})

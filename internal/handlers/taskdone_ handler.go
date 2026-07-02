@@ -10,7 +10,7 @@ import (
 	"task_scheduler/internal/service"
 )
 
-func TaskDoneHandler(w http.ResponseWriter, req *http.Request){
+func TaskDoneHandler(w http.ResponseWriter, req *http.Request) {
 	id := strings.TrimSpace(req.URL.Query().Get("id"))
 	if id == "" {
 		help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "id is empty"})
