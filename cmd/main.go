@@ -13,8 +13,7 @@ func main() {
 
 	err := db.Init()
 	if err != nil {
-		logger.Println(err)
-		return
+		logger.Fatal(err)
 	}
 	defer db.Close()
 
