@@ -3,7 +3,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /scheduler ./cmd
+RUN CGO_ENABLED=0 GOOS=linux go build -o /scheduler ./cmd
 
 FROM alpine:latest
 WORKDIR /app
@@ -12,4 +12,5 @@ COPY web /app/web
 ENV TODO_PORT=7540
 ENV TODO_DBFILE=scheduler.db
 ENV TODO_PASSWORD=
-CMD ["/app/scheduler"]
+EXPOSE 7540
+ENTRYPOINT ["/app/scheduler"]

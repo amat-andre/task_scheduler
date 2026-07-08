@@ -9,7 +9,7 @@ import(
 )
 
 const (
-schema = `CREATE TABLE scheduler (
+schema = `CREATE TABLE IF NOT EXISTS scheduler (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	date CHAR(8) NOT NULL DEFAULT "",
 	title VARCHAR(128) NOT NULL DEFAULT "",
@@ -17,7 +17,7 @@ schema = `CREATE TABLE scheduler (
 	repeat VARCHAR(128) NOT NULL DEFAULT ""
 );
 
-CREATE INDEX scheduler_date_idx ON scheduler(date);
+CREATE INDEX IF NOT EXISTS scheduler_date_idx ON scheduler(date);
 `
 
 defFileDB = "scheduler.db"
@@ -27,6 +27,7 @@ var db *sql.DB
 
 func Init() error {	
 	dbFile := getFileDB()
+
 	var install bool
 	_, err := os.Stat(dbFile)
 	install = os.IsNotExist(err)
@@ -37,8 +38,8 @@ func Init() error {
         return err
     }
 
-	base.SetMaxIdleConns(2)
-    base.SetMaxOpenConns(4)
+	base.SetMaxIdleConns(1)
+    base.SetMaxOpenConns(1)
     base.SetConnMaxIdleTime(time.Minute * 5)
     base.SetConnMaxLifetime(time.Minute * 30)
 
