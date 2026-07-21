@@ -13,7 +13,7 @@ type SignInRequest struct {
 }
 
 func AuthHandler(servPass string) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request){
+	return func(w http.ResponseWriter, req *http.Request) {
 		if req.Method != http.MethodPost {
 			help.WriteJSON(w, http.StatusMethodNotAllowed, map[string]string{"error": "method not allowed"})
 			return
@@ -32,7 +32,7 @@ func AuthHandler(servPass string) http.HandlerFunc {
 			help.WriteJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
 			return
 		}
-	
+
 		if input.Pass == "" {
 			help.WriteJSON(w, http.StatusUnauthorized, map[string]string{"error": "password is not entered"})
 			return
@@ -52,7 +52,7 @@ func AuthHandler(servPass string) http.HandlerFunc {
 		http.SetCookie(w, &http.Cookie{
 			Name:     "token",
 			Value:    token,
-				HttpOnly: true,
+			HttpOnly: true,
 		})
 
 		help.WriteJSON(w, http.StatusOK, map[string]string{"token": token})

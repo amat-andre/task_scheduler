@@ -11,6 +11,13 @@ import (
 
 var ErrTokenSignin = errors.New("token signing error")
 
+var jwtSecret []byte
+
+// Init устанавливает секретный ключ для JWT.
+func Init(secret string) {
+	jwtSecret = []byte(secret)
+}
+
 type Claims struct {
 	PasswordHash string `json:"password_hash"`
 	jwt.RegisteredClaims
@@ -28,20 +35,23 @@ func GenerateToken(pass string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString([]byte(pass))
+	return token.SignedString([]byte(jwtSecret))
 }
 
 func ValidateToken(tokenString, servPass string) bool {
 	claims := Claims{}
+
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (any, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); ok {
-			return []byte(servPass), nil
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrTokenSignin
 		}
-		return nil, ErrTokenSignin
+		return []byte(jwtSecret), nil
 	})
+
 	if err != nil || !token.Valid {
 		return false
 	}
+
 	return claims.PasswordHash == hashPassword(servPass)
 }
 
