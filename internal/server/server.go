@@ -1,54 +1,52 @@
 package server
 
 import (
+	"context"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"task_scheduler/internal/api"
+	"task_scheduler/internal/config"
 )
 
-const (
-	defPort = "7540"
-	webDir  = "./web"
-)
+const webDir = "./web"
 
 type Server struct {
-	Log  *log.Logger
-	Serv http.Server
+	logger     *log.Logger
+	httpServer *http.Server
 }
 
-func NewRout(logger *log.Logger) *Server {
+func New(cfg *config.ServerConfig, logger *log.Logger) *Server {
 	mux := http.NewServeMux()
-	serverPass := getServPass()
 
 	mux.Handle("GET /", http.FileServer(http.Dir(webDir)))
-	api.Init(mux, serverPass)
+	api.Init(mux, cfg.Password)
 
-	server := Server{
-		Log: logger,
-		Serv: http.Server{
-			Addr:        ":" + getPort(),
+	return &Server{
+		logger: logger,
+		httpServer: &http.Server{
+			Addr:        cfg.Port,
 			Handler:     mux,
 			ErrorLog:    logger,
 			ReadTimeout: 5 * time.Second,
 		},
 	}
-
-	return &server
 }
 
-func getPort() string {
-	if port := os.Getenv("TODO_PORT"); len(port) > 0 {
-		return port
+func (server *Server) Run() error {
+	server.logger.Printf("server started: addr %s", server.httpServer.Addr)
+
+	err := server.httpServer.ListenAndServe()
+
+	if err != nil && err != http.ErrServerClosed {
+		return err
 	}
-	return defPort
+
+	return nil
 }
 
-func getServPass() string {
-	if servPass := os.Getenv("TODO_PASSWORD"); len(servPass) > 0 {
-		return servPass
-	}
-	return ""
+func (server *Server) Shutdown(ctx context.Context) error {
+	server.logger.Printf("server stopping")
+	return server.httpServer.Shutdown(ctx)
 }

@@ -1,15 +1,16 @@
 package db
 
-import(
-	"time"
-	"os"
-
+import (
 	"database/sql"
+	"os"
+	"time"
+
+	"task_scheduler/internal/config"
+
 	_ "modernc.org/sqlite"
 )
 
-const (
-schema = `CREATE TABLE IF NOT EXISTS scheduler (
+const schema = `CREATE TABLE IF NOT EXISTS scheduler (
 	id INTEGER PRIMARY KEY AUTOINCREMENT,
 	date CHAR(8) NOT NULL DEFAULT "",
 	title VARCHAR(128) NOT NULL DEFAULT "",
@@ -20,28 +21,22 @@ schema = `CREATE TABLE IF NOT EXISTS scheduler (
 CREATE INDEX IF NOT EXISTS scheduler_date_idx ON scheduler(date);
 `
 
-defFileDB = "scheduler.db"
-)
-
 var db *sql.DB
 
-func Init() error {	
-	dbFile := getFileDB()
-
+func Init(cfg *config.DBConfig) error {
 	var install bool
-	_, err := os.Stat(dbFile)
+	_, err := os.Stat(cfg.Path)
 	install = os.IsNotExist(err)
 
-
-	base, err := sql.Open("sqlite", dbFile)
-    if err != nil {
-        return err
-    }
+	base, err := sql.Open("sqlite", cfg.Path)
+	if err != nil {
+		return err
+	}
 
 	base.SetMaxIdleConns(1)
-    base.SetMaxOpenConns(1)
-    base.SetConnMaxIdleTime(time.Minute * 5)
-    base.SetConnMaxLifetime(time.Minute * 30)
+	base.SetMaxOpenConns(1)
+	base.SetConnMaxIdleTime(time.Minute * 5)
+	base.SetConnMaxLifetime(time.Minute * 30)
 
 	if install {
 		_, err = base.Exec(schema)
@@ -55,15 +50,8 @@ func Init() error {
 	return nil
 }
 
-func Close(){
+func Close() {
 	if db != nil {
 		_ = db.Close()
 	}
-}
-
-func getFileDB() string {
-	if dbFile := os.Getenv("TODO_DBFILE"); len(dbFile) > 0 {
-		return dbFile
-	}
-	return defFileDB
 }
